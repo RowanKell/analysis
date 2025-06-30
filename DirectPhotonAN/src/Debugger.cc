@@ -85,6 +85,18 @@ void Debugger::print_showershape(std::vector<float>& vec)
     }
 }
 
+void Debugger::print_ETCut(float ET)
+{
+    if (feature_map["ETCut"]) {
+        _print_ETCut(ET);
+    }
+}
+
+void Debugger::_print_ETCut(float ET)
+{
+    std::cout << "DEBUGGING: Passed ET cut with ET = " << ET <<std::endl;
+}
+
 void Debugger::_checkpoint(std::string num)
 {
     std::cout << "DEBUGGING: Reached checkpoint #" << num << std::endl;
@@ -98,4 +110,9 @@ void Debugger::checkpoint5() {if(feature_map["checkpoint5"]){_checkpoint("5");}}
 void Debugger::checkpoint6() {if(feature_map["checkpoint6"]){_checkpoint("6");}}
 void Debugger::checkpoint7() {if(feature_map["checkpoint7"]){_checkpoint("7");}}
 
+void Debugger::_print_currentModule(const std::string currModule)
+{
+    std::cout << "DEBUGGING: Starting module \"" << currModule << "\"" << std::endl;
+}
 
+void Debugger::checkpointInitRun() {if(feature_map["checkpointInitRun"]){_print_currentModule("InitRun");}}

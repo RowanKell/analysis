@@ -17,7 +17,9 @@ class Debugger
         void print_requiredTowerNodes(const std::map<std::string, bool>& requiredTowerNodes);
         void print_clustercontainer(RawClusterContainer* clusterContainer);
         void print_showershape(std::vector<float>& vec);
+        void print_ETCut(float ET);
 
+        void checkpointInitRun();
         void checkpoint1();
         void checkpoint2();
         void checkpoint3();
@@ -36,8 +38,20 @@ class Debugger
             {"Towers", false},
             {"Clusters", false},
             {"showershape", false},
-            {"IO", false}
+            {"IO", false},
+            {"ETCut", false},
+            {"checkpoint1", false},
+            {"checkpoint2", false},
+            {"checkpoint3", false},
+            {"checkpoint4", false},
+            {"checkpoint5", false},
+            {"checkpoint6", false},
+            {"checkpoint7", false},
+            {"checkpointInitRun", false}
         };
+
+        void _print_currentModule(const std::string currModule);
+        void _print_ETCut(float ET);
 
         void _print_requiredTowerNodes(const std::map<std::string, bool>& requiredTowerNodes);
         void _print_clustercontainer(RawClusterContainer* clusterContainer);

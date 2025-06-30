@@ -57,6 +57,8 @@ public:
 
   void set_requiredTowerNodes(std::vector<std::string> nodes);
 
+  void set_requireVertexMap(bool req) {require_vertexmap = req;}
+
   void set_useOnnx(bool uo) {useOnnx = uo;}
 
   // Need raw file to use raw... need sdcc account first
@@ -75,6 +77,7 @@ public:
       dphi += 2 * M_PI;
     return sqrt(deta * deta + dphi * dphi);
   }
+  void printSetBits(uint64_t n);
 
 private:
 
@@ -92,6 +95,12 @@ private:
 
   // Trigger stuff
 //   std::vector<int> using_trigger_bits{24, 25, 26, 27, 36, 37, 38};
+
+// https://github.com/sPHENIX-Collaboration/coresoftware/blob/3a263b3f60bf23c54ab89b09814bc660e2556bb5/offline/packages/trigger/TriggerRunInfoReco.cc#L101
+// Photon 2: 28
+// Photon 3: 29
+// Photon 4: 30
+// Photon 5: 31
   bool livetrigger[64] = {false};
   bool scaledtrigger[64] = {false};
   int nlivetrigger[64] = {0};
@@ -101,6 +110,8 @@ private:
   // Vertex stuff
   float vertexz{-9999};
   float vertexz_cut{200.0};
+
+  bool require_vertexmap{true};
 
   // Tower stuff
   RawTowerGeomContainer *geomEM{nullptr};
@@ -258,6 +269,8 @@ private:
   // DEBUGGING TEMP
   int num_reached_ET_cut[nclustercontainer] = {0};
   int num_passed_ET_cut[nclustercontainer] = {0};
+
+  int num_photon_trigger_passed = 0;
 
 
 };

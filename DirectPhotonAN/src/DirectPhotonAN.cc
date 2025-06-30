@@ -203,13 +203,16 @@ int DirectPhotonAN::Init(PHCompositeNode *topNode)
 //____________________________________________________________________________..
 int DirectPhotonAN::InitRun(PHCompositeNode *topNode)
 {
+
+  Debugger *debugger = Debugger::getInstance();
+  debugger->checkpointInitRun();
   runnumber = 0;
 
   RunHeader *runheader = findNode::getClass<RunHeader>(topNode, "RunHeader");
   if (!runheader)
   {
     if(verbosity > 0){
-        std::cout << "DirectPhotonAN::InitRun(PHCompositeNode *topNode) Can't find runheader, reseting node tree" << std::endl;
+        std::cout << "DirectPhotonAN::InitRun(PHCompositeNode *topNode) Can't find runheader, resetting node tree" << std::endl;
     }
    return Fun4AllReturnCodes::RESET_NODE_TREE;
   }
@@ -219,6 +222,8 @@ int DirectPhotonAN::InitRun(PHCompositeNode *topNode)
   }
   return Fun4AllReturnCodes::EVENT_OK;
 }
+
+
 
 int DirectPhotonAN::process_event(PHCompositeNode *topNode)
 {
@@ -298,6 +303,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
         }
 
     }
+
     // Save the scaledown
     TriggerRunInfo *trigRunInfo = findNode::getClass<TriggerRunInfo>(topNode, "TriggerRunInfo");
     for (int i = 0; i < 32; i++)
@@ -305,6 +311,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
         trigger_prescale[i] = trigRunInfo->getPrescaleByBit(i);
     }
     debugger->checkpoint2();
+    if(scaledtrigger[29] || scaledtrigger[30] || scaledtrigger[31]){num_photon_trigger_passed++;}
 
     vertexz = -9999;
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -337,36 +344,50 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
     MbdVertexMap *vertexmap = findNode::getClass<MbdVertexMap>(topNode, "MbdVertexMap");
     if(! vertexmap)
     {
-        if(verbosity > 0)
+        if(require_vertexmap)
         {
-            std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "MbdVertexMap" << " node is missing. Skipping event #" << eventnumber << std::endl;
+            if(verbosity > 0)
+            {
+                std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "MbdVertexMap" << " node is missing. Skipping event #" << eventnumber << std::endl;
+            }
+            return Fun4AllReturnCodes::EVENT_OK;
         }
-        return Fun4AllReturnCodes::EVENT_OK;
-    }
-    if(vertexmap->empty()){
-        if(verbosity > 0)
+        else
         {
-            std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "vertexmap" << " is empty. Skipping event #" << eventnumber << std::endl;
+            if(verbosity > 0)
+            {
+                std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "MbdVertexMap" << " node is missing. Setting vtx z to 0 for event #" << eventnumber << std::endl;
+            }
+            vertexz = 0;
         }
-      return Fun4AllReturnCodes::EVENT_OK;
     }
-    MbdVertex *vtx = vertexmap->begin()->second;
-    if(!vtx)
+    else
     {
-        if(verbosity > 0)
-        {
-            std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "MbdVertex" << " is null. Skipping event #" << eventnumber << std::endl;
-        }
+        if(vertexmap->empty()){
+            if(verbosity > 3) //This happens a lot...
+            {
+                std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "vertexmap" << " is empty. Skipping event #" << eventnumber << std::endl;
+            }
         return Fun4AllReturnCodes::EVENT_OK;
-    }
-    vertexz = vtx->get_z();
-    if(vertexz != vertexz)
-    {
-        if(verbosity > 0)
-        {
-            std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "vertexz" << " is nan. Skipping event #" << eventnumber << std::endl;
         }
-        return Fun4AllReturnCodes::EVENT_OK;
+        MbdVertex *vtx = vertexmap->begin()->second;
+        if(!vtx)
+        {
+            if(verbosity > 0)
+            {
+                std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "MbdVertex" << " is null. Skipping event #" << eventnumber << std::endl;
+            }
+            return Fun4AllReturnCodes::EVENT_OK;
+        }
+        vertexz = vtx->get_z();
+        if(vertexz != vertexz)
+        {
+            if(verbosity > 0)
+            {
+                std::cout << PHWHERE << "DirectPhotonAN::process_event: " << "vertexz" << " is nan. Skipping event #" << eventnumber << std::endl;
+            }
+            return Fun4AllReturnCodes::EVENT_OK;
+        }
     }
     if(abs(vertexz) > vertexz_cut)
     {
@@ -484,7 +505,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
                 continue; // Skip clusters with low ET
             }
             //DEBUGGING
-            std::cout << "Passed ET cut with ET = " << ET << std::endl;
+            debugger->print_ETCut(ET);
             num_passed_ET_cut[i]++;
 
             // Array for storing iso energy for each different radii
@@ -1147,6 +1168,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
             std::cout << "DirectPhotonAN::process_event: ";
             std::cout << "Filling tree: "<< std::endl;
         }
+        tree->Fill();
     }
     else
     {
@@ -1187,6 +1209,9 @@ int DirectPhotonAN::End(PHCompositeNode *topNode)
 
     Debugger* debugger = Debugger::getInstance();
     debugger->checkpoint7();
+
+    //DEBUGGING
+    std::cout << "num_photon_trigger_passed: " << num_photon_trigger_passed << std::endl;
     return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -1309,3 +1334,14 @@ double DirectPhotonAN::getTowerEta(RawTowerGeom *tower_geom, double vx, double v
   }
   return r;
 }
+
+void DirectPhotonAN::printSetBits(uint64_t n)
+  {
+      for (int i = 0; i < 64; i++) {
+          if (n & (1ULL << i)) {
+              std::cout << i << " ";
+          }
+      }
+      std::cout << std::endl;
+  }
+
