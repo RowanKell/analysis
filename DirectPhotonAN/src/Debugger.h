@@ -28,6 +28,20 @@ class Debugger
         void checkpoint6();
         void checkpoint7();
 
+
+        void clusterCheckpoint1();
+        void clusterCheckpoint2();
+        void clusterCheckpoint3();
+        void clusterCheckpoint4();
+        void clusterCheckpoint5();
+        void clusterCheckpoint6();
+        void clusterCheckpoint7();
+        void clusterCheckpoint8();
+        void clusterCheckpoint9();
+        void clusterCheckpoint10();
+        void clusterCheckpoint11();
+        void clusterCheckpoint12();
+
         void set_debugging_feature(const std::string& feature, bool status) {feature_map[feature] = status;}
 
     private:
@@ -47,6 +61,18 @@ class Debugger
             {"checkpoint5", false},
             {"checkpoint6", false},
             {"checkpoint7", false},
+            {"clusterCheckpoint1", false},
+            {"clusterCheckpoint2", false},
+            {"clusterCheckpoint3", false},
+            {"clusterCheckpoint4", false},
+            {"clusterCheckpoint5", false},
+            {"clusterCheckpoint6", false},
+            {"clusterCheckpoint7", false},
+            {"clusterCheckpoint8", false},
+            {"clusterCheckpoint9", false},
+            {"clusterCheckpoint10", false},
+            {"clusterCheckpoint11", false},
+            {"clusterCheckpoint12", false},
             {"checkpointInitRun", false}
         };
 
@@ -58,6 +84,8 @@ class Debugger
         void _print_vector(std::vector<float>& vec);
 
         void _checkpoint(std::string num);
+
+        void _clusterCheckpoint(std::string num);
 
         ClassDef(Debugger, 1) // ROOT class definition for dictionary generation
 };

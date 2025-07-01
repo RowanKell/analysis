@@ -16,13 +16,15 @@
 
 #include <phool/onnxlib.h>
 
+#include <iostream>
+
 class PHCompositeNode;
 class CaloEvalStack;
 class CaloRawClusterEval;
 class CaloTruthEval;
 class RawTowerGeom;
 class RawTowerGeomContainer;
-class TowerInfoContainer;
+class TowerInfoContainerv4;
 class PHG4TruthInfoContainer;
 class CaloEvalStack;
 
@@ -79,6 +81,15 @@ public:
   }
   void printSetBits(uint64_t n);
 
+  template<typename K, typename V>
+  void printMap(const std::map<K, V>& m) 
+  {
+      for (const auto& [key, value] : m) 
+      {
+          std::cout << key << ": " << value << "\n";
+      }
+  }
+
 private:
 
   bool useRaw = true;
@@ -127,8 +138,8 @@ private:
     {"TOWERINFO_CALIB_HCALOUT", false}
   };
 
-  std::map<std::string, TowerInfoContainer*> towerNodeMap;
-  TowerInfoContainer *currTowerContainer{nullptr};
+  std::map<std::string, TowerInfoContainerv4*> towerNodeMap;
+  TowerInfoContainerv4 *currTowerContainer{nullptr};
 
 
   //EMCal towers
@@ -146,88 +157,87 @@ private:
   }
 
   // Clusters
-  std::vector<std::string> clusternamelist = {"CLUSTERINFO_CEMC_NO_SPLIT","CLUSTERINFO_CEMC"};
+  std::string clustername = "CLUSTERINFO_CEMC";
   // If useRaw false, then the 0th entry will always be empty (no CEMC_NO_SPLIT data)
-  static const int nclustercontainer = 2;
 
   // Shower shape stuff
   static const int nclustermax = 10000;
   static const int arrayntower = 49;
-  int cluster_e_array_idx[nclustercontainer][nclustermax][arrayntower] = {0};
-  int cluster_ownership_array[nclustercontainer][nclustermax][arrayntower] = {0};
-  int cluster_status_array[nclustercontainer][nclustermax][arrayntower] = {0};
-  float cluster_e_array[nclustercontainer][nclustermax][arrayntower] = {0};
-  float cluster_adc_array[nclustercontainer][nclustermax][arrayntower] = {0};
-  float cluster_time_array[nclustercontainer][nclustermax][arrayntower] = {0};
+  int cluster_e_array_idx[nclustermax][arrayntower] = {0};
+  int cluster_ownership_array[nclustermax][arrayntower] = {0};
+  int cluster_status_array[nclustermax][arrayntower] = {0};
+  float cluster_e_array[nclustermax][arrayntower] = {0};
+  float cluster_adc_array[nclustermax][arrayntower] = {0};
+  float cluster_time_array[nclustermax][arrayntower] = {0};
   
-  float cluster_e1[nclustercontainer][nclustermax] = {0};
-  float cluster_e2[nclustercontainer][nclustermax] = {0};
-  float cluster_e3[nclustercontainer][nclustermax] = {0};
-  float cluster_e4[nclustercontainer][nclustermax] = {0};
-  float cluster_et1[nclustercontainer][nclustermax] = {0};
-  float cluster_et2[nclustercontainer][nclustermax] = {0};
-  float cluster_et3[nclustercontainer][nclustermax] = {0};
-  float cluster_et4[nclustercontainer][nclustermax] = {0};
-  float cluster_ietacent[nclustercontainer][nclustermax] = {0};
-  float cluster_iphicent[nclustercontainer][nclustermax] = {0};
-  float cluster_weta[nclustercontainer][nclustermax] = {0};
-  float cluster_wphi[nclustercontainer][nclustermax] = {0};
-  float cluster_weta_cog[nclustercontainer][nclustermax] = {0};
-  float cluster_wphi_cog[nclustercontainer][nclustermax] = {0};
-  float cluster_weta_cogx[nclustercontainer][nclustermax] = {0};
-  float cluster_wphi_cogx[nclustercontainer][nclustermax] = {0};
-  int cluster_detamax[nclustercontainer][nclustermax] = {0};
-  int cluster_dphimax[nclustercontainer][nclustermax] = {0};
-  int cluster_nsaturated[nclustercontainer][nclustermax] = {0};
+  float cluster_e1[nclustermax] = {0};
+  float cluster_e2[nclustermax] = {0};
+  float cluster_e3[nclustermax] = {0};
+  float cluster_e4[nclustermax] = {0};
+  float cluster_et1[nclustermax] = {0};
+  float cluster_et2[nclustermax] = {0};
+  float cluster_et3[nclustermax] = {0};
+  float cluster_et4[nclustermax] = {0};
+  float cluster_ietacent[nclustermax] = {0};
+  float cluster_iphicent[nclustermax] = {0};
+  float cluster_weta[nclustermax] = {0};
+  float cluster_wphi[nclustermax] = {0};
+  float cluster_weta_cog[nclustermax] = {0};
+  float cluster_wphi_cog[nclustermax] = {0};
+  float cluster_weta_cogx[nclustermax] = {0};
+  float cluster_wphi_cogx[nclustermax] = {0};
+  int cluster_detamax[nclustermax] = {0};
+  int cluster_dphimax[nclustermax] = {0};
+  int cluster_nsaturated[nclustermax] = {0};
 
-  float cluster_e11[nclustercontainer][nclustermax] = {0};
-  float cluster_e22[nclustercontainer][nclustermax] = {0};
-  float cluster_e13[nclustercontainer][nclustermax] = {0};
-  float cluster_e15[nclustercontainer][nclustermax] = {0};
-  float cluster_e17[nclustercontainer][nclustermax] = {0};
-  float cluster_e31[nclustercontainer][nclustermax] = {0};
-  float cluster_e51[nclustercontainer][nclustermax] = {0};
-  float cluster_e71[nclustercontainer][nclustermax] = {0};
-  float cluster_e33[nclustercontainer][nclustermax] = {0};
-  float cluster_e35[nclustercontainer][nclustermax] = {0};
-  float cluster_e37[nclustercontainer][nclustermax] = {0};
-  float cluster_e53[nclustercontainer][nclustermax] = {0};
-  float cluster_e73[nclustercontainer][nclustermax] = {0};
-  float cluster_e55[nclustercontainer][nclustermax] = {0};
-  float cluster_e57[nclustercontainer][nclustermax] = {0};
-  float cluster_e75[nclustercontainer][nclustermax] = {0};
-  float cluster_e77[nclustercontainer][nclustermax] = {0};
-  float cluster_w32[nclustercontainer][nclustermax] = {0};
-  float cluster_e32[nclustercontainer][nclustermax] = {0};
-  float cluster_w52[nclustercontainer][nclustermax] = {0};
-  float cluster_e52[nclustercontainer][nclustermax] = {0};
-  float cluster_w72[nclustercontainer][nclustermax] = {0};
-  float cluster_e72[nclustercontainer][nclustermax] = {0};
+  float cluster_e11[nclustermax] = {0};
+  float cluster_e22[nclustermax] = {0};
+  float cluster_e13[nclustermax] = {0};
+  float cluster_e15[nclustermax] = {0};
+  float cluster_e17[nclustermax] = {0};
+  float cluster_e31[nclustermax] = {0};
+  float cluster_e51[nclustermax] = {0};
+  float cluster_e71[nclustermax] = {0};
+  float cluster_e33[nclustermax] = {0};
+  float cluster_e35[nclustermax] = {0};
+  float cluster_e37[nclustermax] = {0};
+  float cluster_e53[nclustermax] = {0};
+  float cluster_e73[nclustermax] = {0};
+  float cluster_e55[nclustermax] = {0};
+  float cluster_e57[nclustermax] = {0};
+  float cluster_e75[nclustermax] = {0};
+  float cluster_e77[nclustermax] = {0};
+  float cluster_w32[nclustermax] = {0};
+  float cluster_e32[nclustermax] = {0};
+  float cluster_w52[nclustermax] = {0};
+  float cluster_e52[nclustermax] = {0};
+  float cluster_w72[nclustermax] = {0};
+  float cluster_e72[nclustermax] = {0};
 
 
-  int ncluster[nclustercontainer] = {0};
-  float cluster_E[nclustercontainer][nclustermax] = {0};
-  float cluster_Et[nclustercontainer][nclustermax] = {0};
-  float cluster_Eta[nclustercontainer][nclustermax] = {0};
-  float cluster_Phi[nclustercontainer][nclustermax] = {0};
-  float cluster_prob[nclustercontainer][nclustermax] = {0};
-  float cluster_merged_prob[nclustercontainer][nclustermax] = {0};
-  float cluster_CNN_prob[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_02[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_04[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_emcal[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_hcalin[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_hcalout[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_60_emcal[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_60_hcalin[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_60_hcalout[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_120_emcal[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_120_hcalin[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_03_120_hcalout[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_04_emcal[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_04_hcalin[nclustercontainer][nclustermax] = {0};
-  float cluster_iso_04_hcalout[nclustercontainer][nclustermax] = {0};
+  int ncluster = 0;
+  float cluster_E[nclustermax] = {0};
+  float cluster_Et[nclustermax] = {0};
+  float cluster_Eta[nclustermax] = {0};
+  float cluster_Phi[nclustermax] = {0};
+  float cluster_prob[nclustermax] = {0};
+  float cluster_merged_prob[nclustermax] = {0};
+  float cluster_CNN_prob[nclustermax] = {0};
+  float cluster_iso_02[nclustermax] = {0};
+  float cluster_iso_03[nclustermax] = {0};
+  float cluster_iso_04[nclustermax] = {0};
+  float cluster_iso_03_emcal[nclustermax] = {0};
+  float cluster_iso_03_hcalin[nclustermax] = {0};
+  float cluster_iso_03_hcalout[nclustermax] = {0};
+  float cluster_iso_03_60_emcal[nclustermax] = {0};
+  float cluster_iso_03_60_hcalin[nclustermax] = {0};
+  float cluster_iso_03_60_hcalout[nclustermax] = {0};
+  float cluster_iso_03_120_emcal[nclustermax] = {0};
+  float cluster_iso_03_120_hcalin[nclustermax] = {0};
+  float cluster_iso_03_120_hcalout[nclustermax] = {0};
+  float cluster_iso_04_emcal[nclustermax] = {0};
+  float cluster_iso_04_hcalin[nclustermax] = {0};
+  float cluster_iso_04_hcalout[nclustermax] = {0};
 
 
   float calculateET(float eta, float phi, float dR, int layer, float min_E); // layer: 0 EMCal, 1 IHCal, 2 OHCal
@@ -246,7 +256,7 @@ private:
   static const int nRadii = 3;
 
   // Cluster cut values
-  float clusterpTmin{5};
+  float clusterpTmin{1};
 
   //Particle cut values
   float particlepTmin{1};
@@ -267,8 +277,8 @@ private:
 
 
   // DEBUGGING TEMP
-  int num_reached_ET_cut[nclustercontainer] = {0};
-  int num_passed_ET_cut[nclustercontainer] = {0};
+  int num_reached_ET_cut = 0;
+  int num_passed_ET_cut = 0;
 
   int num_photon_trigger_passed = 0;
 

@@ -110,6 +110,24 @@ void Debugger::checkpoint5() {if(feature_map["checkpoint5"]){_checkpoint("5");}}
 void Debugger::checkpoint6() {if(feature_map["checkpoint6"]){_checkpoint("6");}}
 void Debugger::checkpoint7() {if(feature_map["checkpoint7"]){_checkpoint("7");}}
 
+void Debugger::_clusterCheckpoint(std::string num)
+{
+    std::cout << "DEBUGGING: reached cluster checkpoint #" << num << std::endl;
+}
+
+void Debugger::clusterCheckpoint1() {if(feature_map["clusterCheckpoint1"]) {_clusterCheckpoint("1");}}
+void Debugger::clusterCheckpoint2() {if(feature_map["clusterCheckpoint2"]) {_clusterCheckpoint("2");}}
+void Debugger::clusterCheckpoint3() {if(feature_map["clusterCheckpoint3"]) {_clusterCheckpoint("3");}}
+void Debugger::clusterCheckpoint4() {if(feature_map["clusterCheckpoint4"]) {_clusterCheckpoint("4");}}
+void Debugger::clusterCheckpoint5() {if(feature_map["clusterCheckpoint5"]) {_clusterCheckpoint("5");}}
+void Debugger::clusterCheckpoint6() {if(feature_map["clusterCheckpoint6"]) {_clusterCheckpoint("6");}}
+void Debugger::clusterCheckpoint7() {if(feature_map["clusterCheckpoint7"]) {_clusterCheckpoint("7");}}
+void Debugger::clusterCheckpoint8() {if(feature_map["clusterCheckpoint8"]) {_clusterCheckpoint("8");}}
+void Debugger::clusterCheckpoint9() {if(feature_map["clusterCheckpoint9"]) {_clusterCheckpoint("9");}}
+void Debugger::clusterCheckpoint10() {if(feature_map["clusterCheckpoint10"]) {_clusterCheckpoint("10");}}
+void Debugger::clusterCheckpoint11() {if(feature_map["clusterCheckpoint11"]) {_clusterCheckpoint("11");}}
+void Debugger::clusterCheckpoint12() {if(feature_map["clusterCheckpoint12"]) {_clusterCheckpoint("12");}}
+
 void Debugger::_print_currentModule(const std::string currModule)
 {
     std::cout << "DEBUGGING: Starting module \"" << currModule << "\"" << std::endl;
