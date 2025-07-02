@@ -22,6 +22,14 @@ Debugger* Debugger::getInstance() {
     return instance;
 }
 
+void Debugger::_print_eventNumber(int eventNum)
+{
+    std::cout << "DEBUGGING: Beginning event #" << eventNum << std::endl;
+}
+
+void Debugger::print_eventNumber(int eventNum){if(feature_map["PrintEventNumber"]) {_print_eventNumber(eventNum);}}
+
+
 // Method to print the required tower nodes and their status
 void Debugger::_print_requiredTowerNodes(const std::map<std::string, bool>& requiredTowerNodes)
 {

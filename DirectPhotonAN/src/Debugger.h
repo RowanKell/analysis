@@ -14,6 +14,9 @@ class Debugger
         Debugger() = default;
         virtual ~Debugger(){};
         static Debugger* getInstance();
+
+        void print_eventNumber(int eventNum);
+
         void print_requiredTowerNodes(const std::map<std::string, bool>& requiredTowerNodes);
         void print_clustercontainer(RawClusterContainer* clusterContainer);
         void print_showershape(std::vector<float>& vec);
@@ -49,6 +52,7 @@ class Debugger
 
         std::map<std::string, bool> feature_map = 
         {
+            {"PrintEventNumber", false},
             {"Towers", false},
             {"Clusters", false},
             {"showershape", false},
@@ -75,6 +79,8 @@ class Debugger
             {"clusterCheckpoint12", false},
             {"checkpointInitRun", false}
         };
+
+        void _print_eventNumber(int eventNum);
 
         void _print_currentModule(const std::string currModule);
         void _print_ETCut(float ET);

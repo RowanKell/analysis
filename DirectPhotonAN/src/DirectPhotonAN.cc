@@ -78,6 +78,13 @@
 #include <jetbase/Jetv1.h>
 #include <jetbase/Jetv2.h>
 #include <jetbase/JetContainer.h>
+
+
+
+//spin database stuff
+#include <uspin/SpinDBContent.h>
+#include <uspin/SpinDBOutput.h>
+
 //____________________________________________________________________________..
 DirectPhotonAN::DirectPhotonAN(const std::string &name, const std::string &filename) : SubsysReco(name)
 {
@@ -111,90 +118,102 @@ int DirectPhotonAN::Init(PHCompositeNode *topNode)
   tree = new TTree("tree", "tree");
   tree->Branch("runnumber", &runnumber, "runnumber/I");
   tree->Branch("eventnumber", &eventnumber, "eventnumber/I");
+  tree->Branch("bunchnumber", &bunchnumber, "bunchnumber/I");
   tree->Branch("trigger_prescale", trigger_prescale, "trigger_prescale[64]/F");
   tree->Branch("scaledtrigger", scaledtrigger, "scaledtrigger[64]/O");
   tree->Branch("livetrigger", livetrigger, "livetrigger[64]/O");
   tree->Branch("trigger_prescale", trigger_prescale, "trigger_prescale[64]/F");
   tree->Branch("vertexz", &vertexz, "vertexz/F");
 
+  tree->Branch("bspin", &bspin, "bspin/F");
+  tree->Branch("yspin", &yspin, "yspin/F");
+  tree->Branch("lumiUpYellow", &lumiUpYellow, "lumiUpYellow/F");
+  tree->Branch("lumiDownYellow", &lumiDownYellow, "lumiDownYellow/F");
+  tree->Branch("lumiUpBlue", &lumiUpBlue, "lumiUpBlue/F");
+  tree->Branch("lumiDownBlue", &lumiDownBlue, "lumiDownBlue/F");
+  tree->Branch("polBlue", &polBlue, "polBlue/F");
+  tree->Branch("polYellow", &polYellow, "polYellow/F");
+  tree->Branch("crossingAngle", &crossingAngle, "crossingAngle/F");
+
 tree->Branch(Form("ncluster_%s", clustername.c_str()), &ncluster, Form("ncluster_%s/I", clustername.c_str()));
 
-tree->Branch(Form("cluster_e_array_%s", clustername.c_str()), cluster_e_array, Form("cluster_e_array_%s[ncluster_%s][%d]/F", clustername.c_str(), clustername.c_str(), arrayntower));
-tree->Branch(Form("cluster_adc_array_%s", clustername.c_str()), cluster_adc_array, Form("cluster_adc_array_%s[ncluster_%s][%d]/F", clustername.c_str(), clustername.c_str(), arrayntower));
-tree->Branch(Form("cluster_time_array_%s", clustername.c_str()), cluster_time_array, Form("cluster_time_array_%s[ncluster_%s][%d]/F", clustername.c_str(), clustername.c_str(), arrayntower));
-tree->Branch(Form("cluster_e_array_idx_%s", clustername.c_str()), cluster_e_array_idx, Form("cluster_e_array_idx_%s[ncluster_%s][%d]/I", clustername.c_str(), clustername.c_str(), arrayntower));
-tree->Branch(Form("cluster_status_array_%s", clustername.c_str()), cluster_status_array, Form("cluster_status_array_%s[ncluster_%s][%d]/I", clustername.c_str(), clustername.c_str(), arrayntower));
-tree->Branch(Form("cluster_ownership_array_%s", clustername.c_str()), cluster_ownership_array, Form("cluster_ownership_array_%s[ncluster_%s][%d]/I", clustername.c_str(), clustername.c_str(), arrayntower));
-
-tree->Branch(Form("cluster_E_%s", clustername.c_str()), cluster_E, Form("cluster_E_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_Et_%s", clustername.c_str()), cluster_Et, Form("cluster_Et_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_Eta_%s", clustername.c_str()), cluster_Eta, Form("cluster_Eta_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_Phi_%s", clustername.c_str()), cluster_Phi, Form("cluster_Phi_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_prob_%s", clustername.c_str()), cluster_prob, Form("cluster_prob_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_merged_prob_%s", clustername.c_str()), cluster_merged_prob, Form("cluster_merged_prob_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_CNN_prob_%s", clustername.c_str()), cluster_CNN_prob, Form("cluster_CNN_prob_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_02_%s", clustername.c_str()), cluster_iso_02, Form("cluster_iso_02_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_%s", clustername.c_str()), cluster_iso_03, Form("cluster_iso_03_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_04_%s", clustername.c_str()), cluster_iso_04, Form("cluster_iso_04_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_emcal_%s", clustername.c_str()), cluster_iso_03_emcal, Form("cluster_iso_03_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_hcalin_%s", clustername.c_str()), cluster_iso_03_hcalin, Form("cluster_iso_03_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_hcalout_%s", clustername.c_str()), cluster_iso_03_hcalout, Form("cluster_iso_03_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_60_emcal_%s", clustername.c_str()), cluster_iso_03_60_emcal, Form("cluster_iso_03_60_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_60_hcalin_%s", clustername.c_str()), cluster_iso_03_60_hcalin, Form("cluster_iso_03_60_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_60_hcalout_%s", clustername.c_str()), cluster_iso_03_60_hcalout, Form("cluster_iso_03_60_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_120_emcal_%s", clustername.c_str()), cluster_iso_03_120_emcal, Form("cluster_iso_03_120_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_120_hcalin_%s", clustername.c_str()), cluster_iso_03_120_hcalin, Form("cluster_iso_03_120_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_03_120_hcalout_%s", clustername.c_str()), cluster_iso_03_120_hcalout, Form("cluster_iso_03_120_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_04_emcal_%s", clustername.c_str()), cluster_iso_04_emcal, Form("cluster_iso_04_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_04_hcalin_%s", clustername.c_str()), cluster_iso_04_hcalin, Form("cluster_iso_04_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iso_04_hcalout_%s", clustername.c_str()), cluster_iso_04_hcalout, Form("cluster_iso_04_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e1_%s", clustername.c_str()), cluster_e1, Form("cluster_e1_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e2_%s", clustername.c_str()), cluster_e2, Form("cluster_e2_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e3_%s", clustername.c_str()), cluster_e3, Form("cluster_e3_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e4_%s", clustername.c_str()), cluster_e4, Form("cluster_e4_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_et1_%s", clustername.c_str()), cluster_et1, Form("cluster_et1_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_et2_%s", clustername.c_str()), cluster_et2, Form("cluster_et2_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_et3_%s", clustername.c_str()), cluster_et3, Form("cluster_et3_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_et4_%s", clustername.c_str()), cluster_et4, Form("cluster_et4_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_weta_%s", clustername.c_str()), cluster_weta, Form("cluster_weta_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_wphi_%s", clustername.c_str()), cluster_wphi, Form("cluster_wphi_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_weta_cog_%s", clustername.c_str()), cluster_weta_cog, Form("cluster_weta_cog_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_wphi_cog_%s", clustername.c_str()), cluster_wphi_cog, Form("cluster_wphi_cog_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_weta_cogx_%s", clustername.c_str()), cluster_weta_cogx, Form("cluster_weta_cogx_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_wphi_cogx_%s", clustername.c_str()), cluster_wphi_cogx, Form("cluster_wphi_cogx_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_ietacent_%s", clustername.c_str()), cluster_ietacent, Form("cluster_ietacent_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_iphicent_%s", clustername.c_str()), cluster_iphicent, Form("cluster_iphicent_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_detamax_%s", clustername.c_str()), cluster_detamax, Form("cluster_detamax_%s[ncluster_%s]/I", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_dphimax_%s", clustername.c_str()), cluster_dphimax, Form("cluster_dphimax_%s[ncluster_%s]/I", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_nsaturated_%s", clustername.c_str()), cluster_nsaturated, Form("cluster_nsaturated_%s[ncluster_%s]/I", clustername.c_str(), clustername.c_str()));
-
-tree->Branch(Form("cluster_e11_%s", clustername.c_str()), cluster_e11, Form("cluster_e11_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e22_%s", clustername.c_str()), cluster_e22, Form("cluster_e22_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e13_%s", clustername.c_str()), cluster_e13, Form("cluster_e13_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e15_%s", clustername.c_str()), cluster_e15, Form("cluster_e15_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e17_%s", clustername.c_str()), cluster_e17, Form("cluster_e17_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e31_%s", clustername.c_str()), cluster_e31, Form("cluster_e31_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e51_%s", clustername.c_str()), cluster_e51, Form("cluster_e51_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e71_%s", clustername.c_str()), cluster_e71, Form("cluster_e71_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e33_%s", clustername.c_str()), cluster_e33, Form("cluster_e33_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e35_%s", clustername.c_str()), cluster_e35, Form("cluster_e35_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e37_%s", clustername.c_str()), cluster_e37, Form("cluster_e37_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e53_%s", clustername.c_str()), cluster_e53, Form("cluster_e53_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e73_%s", clustername.c_str()), cluster_e73, Form("cluster_e73_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e55_%s", clustername.c_str()), cluster_e55, Form("cluster_e55_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e57_%s", clustername.c_str()), cluster_e57, Form("cluster_e57_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e75_%s", clustername.c_str()), cluster_e75, Form("cluster_e75_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e77_%s", clustername.c_str()), cluster_e77, Form("cluster_e77_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_w32_%s", clustername.c_str()), cluster_w32, Form("cluster_w32_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e32_%s", clustername.c_str()), cluster_e32, Form("cluster_e32_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_w52_%s", clustername.c_str()), cluster_w52, Form("cluster_w52_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e52_%s", clustername.c_str()), cluster_e52, Form("cluster_e52_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_w72_%s", clustername.c_str()), cluster_w72, Form("cluster_w72_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
-tree->Branch(Form("cluster_e72_%s", clustername.c_str()), cluster_e72, Form("cluster_e72_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));  
+  tree->Branch(Form("cluster_e_array_%s", clustername.c_str()), cluster_e_array, Form("cluster_e_array_%s[ncluster_%s][%d]/F", clustername.c_str(), clustername.c_str(), arrayntower));
+  tree->Branch(Form("cluster_adc_array_%s", clustername.c_str()), cluster_adc_array, Form("cluster_adc_array_%s[ncluster_%s][%d]/F", clustername.c_str(), clustername.c_str(), arrayntower));
+  tree->Branch(Form("cluster_time_array_%s", clustername.c_str()), cluster_time_array, Form("cluster_time_array_%s[ncluster_%s][%d]/F", clustername.c_str(), clustername.c_str(), arrayntower));
+  tree->Branch(Form("cluster_e_array_idx_%s", clustername.c_str()), cluster_e_array_idx, Form("cluster_e_array_idx_%s[ncluster_%s][%d]/I", clustername.c_str(), clustername.c_str(), arrayntower));
+  tree->Branch(Form("cluster_status_array_%s", clustername.c_str()), cluster_status_array, Form("cluster_status_array_%s[ncluster_%s][%d]/I", clustername.c_str(), clustername.c_str(), arrayntower));
+  tree->Branch(Form("cluster_ownership_array_%s", clustername.c_str()), cluster_ownership_array, Form("cluster_ownership_array_%s[ncluster_%s][%d]/I", clustername.c_str(), clustername.c_str(), arrayntower));
+  
+  tree->Branch(Form("cluster_E_%s", clustername.c_str()), cluster_E, Form("cluster_E_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_Et_%s", clustername.c_str()), cluster_Et, Form("cluster_Et_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_Eta_%s", clustername.c_str()), cluster_Eta, Form("cluster_Eta_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_Phi_%s", clustername.c_str()), cluster_Phi, Form("cluster_Phi_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_prob_%s", clustername.c_str()), cluster_prob, Form("cluster_prob_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_merged_prob_%s", clustername.c_str()), cluster_merged_prob, Form("cluster_merged_prob_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_CNN_prob_%s", clustername.c_str()), cluster_CNN_prob, Form("cluster_CNN_prob_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_02_%s", clustername.c_str()), cluster_iso_02, Form("cluster_iso_02_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_%s", clustername.c_str()), cluster_iso_03, Form("cluster_iso_03_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_04_%s", clustername.c_str()), cluster_iso_04, Form("cluster_iso_04_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_emcal_%s", clustername.c_str()), cluster_iso_03_emcal, Form("cluster_iso_03_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_hcalin_%s", clustername.c_str()), cluster_iso_03_hcalin, Form("cluster_iso_03_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_hcalout_%s", clustername.c_str()), cluster_iso_03_hcalout, Form("cluster_iso_03_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_60_emcal_%s", clustername.c_str()), cluster_iso_03_60_emcal, Form("cluster_iso_03_60_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_60_hcalin_%s", clustername.c_str()), cluster_iso_03_60_hcalin, Form("cluster_iso_03_60_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_60_hcalout_%s", clustername.c_str()), cluster_iso_03_60_hcalout, Form("cluster_iso_03_60_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_120_emcal_%s", clustername.c_str()), cluster_iso_03_120_emcal, Form("cluster_iso_03_120_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_120_hcalin_%s", clustername.c_str()), cluster_iso_03_120_hcalin, Form("cluster_iso_03_120_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_03_120_hcalout_%s", clustername.c_str()), cluster_iso_03_120_hcalout, Form("cluster_iso_03_120_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_04_emcal_%s", clustername.c_str()), cluster_iso_04_emcal, Form("cluster_iso_04_emcal_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_04_hcalin_%s", clustername.c_str()), cluster_iso_04_hcalin, Form("cluster_iso_04_hcalin_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iso_04_hcalout_%s", clustername.c_str()), cluster_iso_04_hcalout, Form("cluster_iso_04_hcalout_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e1_%s", clustername.c_str()), cluster_e1, Form("cluster_e1_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e2_%s", clustername.c_str()), cluster_e2, Form("cluster_e2_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e3_%s", clustername.c_str()), cluster_e3, Form("cluster_e3_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e4_%s", clustername.c_str()), cluster_e4, Form("cluster_e4_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_et1_%s", clustername.c_str()), cluster_et1, Form("cluster_et1_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_et2_%s", clustername.c_str()), cluster_et2, Form("cluster_et2_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_et3_%s", clustername.c_str()), cluster_et3, Form("cluster_et3_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_et4_%s", clustername.c_str()), cluster_et4, Form("cluster_et4_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_weta_%s", clustername.c_str()), cluster_weta, Form("cluster_weta_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_wphi_%s", clustername.c_str()), cluster_wphi, Form("cluster_wphi_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_weta_cog_%s", clustername.c_str()), cluster_weta_cog, Form("cluster_weta_cog_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_wphi_cog_%s", clustername.c_str()), cluster_wphi_cog, Form("cluster_wphi_cog_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_weta_cogx_%s", clustername.c_str()), cluster_weta_cogx, Form("cluster_weta_cogx_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_wphi_cogx_%s", clustername.c_str()), cluster_wphi_cogx, Form("cluster_wphi_cogx_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_ietacent_%s", clustername.c_str()), cluster_ietacent, Form("cluster_ietacent_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_iphicent_%s", clustername.c_str()), cluster_iphicent, Form("cluster_iphicent_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_detamax_%s", clustername.c_str()), cluster_detamax, Form("cluster_detamax_%s[ncluster_%s]/I", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_dphimax_%s", clustername.c_str()), cluster_dphimax, Form("cluster_dphimax_%s[ncluster_%s]/I", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_nsaturated_%s", clustername.c_str()), cluster_nsaturated, Form("cluster_nsaturated_%s[ncluster_%s]/I", clustername.c_str(), clustername.c_str()));
+  
+  tree->Branch(Form("cluster_e11_%s", clustername.c_str()), cluster_e11, Form("cluster_e11_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e22_%s", clustername.c_str()), cluster_e22, Form("cluster_e22_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e13_%s", clustername.c_str()), cluster_e13, Form("cluster_e13_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e15_%s", clustername.c_str()), cluster_e15, Form("cluster_e15_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e17_%s", clustername.c_str()), cluster_e17, Form("cluster_e17_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e31_%s", clustername.c_str()), cluster_e31, Form("cluster_e31_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e51_%s", clustername.c_str()), cluster_e51, Form("cluster_e51_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e71_%s", clustername.c_str()), cluster_e71, Form("cluster_e71_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e33_%s", clustername.c_str()), cluster_e33, Form("cluster_e33_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e35_%s", clustername.c_str()), cluster_e35, Form("cluster_e35_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e37_%s", clustername.c_str()), cluster_e37, Form("cluster_e37_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e53_%s", clustername.c_str()), cluster_e53, Form("cluster_e53_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e73_%s", clustername.c_str()), cluster_e73, Form("cluster_e73_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e55_%s", clustername.c_str()), cluster_e55, Form("cluster_e55_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e57_%s", clustername.c_str()), cluster_e57, Form("cluster_e57_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e75_%s", clustername.c_str()), cluster_e75, Form("cluster_e75_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e77_%s", clustername.c_str()), cluster_e77, Form("cluster_e77_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_w32_%s", clustername.c_str()), cluster_w32, Form("cluster_w32_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e32_%s", clustername.c_str()), cluster_e32, Form("cluster_e32_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_w52_%s", clustername.c_str()), cluster_w52, Form("cluster_w52_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e52_%s", clustername.c_str()), cluster_e52, Form("cluster_e52_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_w72_%s", clustername.c_str()), cluster_w72, Form("cluster_w72_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));
+  tree->Branch(Form("cluster_e72_%s", clustername.c_str()), cluster_e72, Form("cluster_e72_%s[ncluster_%s]/F", clustername.c_str(), clustername.c_str()));  
 
 
   E_histo = new TH1F("E_histo","E_histo", 100, 0, 100);
 
+  std::cout << "Finished Init()" << std::endl;
   return Fun4AllReturnCodes::EVENT_OK;
 }
 
@@ -216,6 +235,16 @@ int DirectPhotonAN::InitRun(PHCompositeNode *topNode)
    return Fun4AllReturnCodes::RESET_NODE_TREE;
   }
   runnumber = runheader->get_RunNumber();
+
+  
+//   int spinDB_status = getSpinInfo();
+//   if(spinDB_status) 
+//   {
+//     std::cout << "Error: spinDB_Status: " << spinDB_status << std::endl;
+//     std::cout << "Aborting run" << std::endl;
+//     return Fun4AllReturnCodes::ABORTRUN;
+//   }
+
   if(verbosity > 1){
     std::cout << "DirectPhotonAN::InitRun(PHCompositeNode *topNode) Initializing for Run " << runnumber << std::endl;
   }
@@ -250,7 +279,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
             std::cout << "DirectPhotonAN::process_event: No valid EventHeader found. Event Number set to -1" << std::endl;
         }
     }
-
+    debugger->print_eventNumber(eventnumber);
     if(verbosity > 2 && eventnumber >= 0)
     {
         std::cout << "DirectPhotonAN::process_event(PHCompositeNode *topNode) Processing event " << eventnumber << std::endl;
@@ -278,6 +307,12 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
     }
     if(gl1PacketInfo)
     {
+        // Get spins
+        bunchnumber = gl1PacketInfo->getBunchNumber();
+        sphenixBunch = (bunchnumber + crossingShift)%NBUNCHES;
+        bspin = spinPatternBlue[sphenixBunch];
+        yspin = spinPatternYellow[sphenixBunch];
+
         uint64_t triggervec = gl1PacketInfo->getScaledVector();
         uint64_t triggervecraw = gl1PacketInfo->getLiveVector();
 
@@ -398,6 +433,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
     }
     debugger->checkpoint3();
 
+
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
     /*             Process Calo Towers and Clusters             */
     /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
@@ -517,6 +553,9 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
 
         //CHECK
         //Calculate various ET values
+        // eta: eta of cluster
+        // phi : phi of cluster
+        //                 calculateET(eta, phi, dR,  layer, min_E)
         float emcalET_04 = calculateET(eta, phi, 0.4, 0, -10.0);
         float ihcalET_04 = calculateET(eta, phi, 0.4, 1, -10.0);
         float ohcalET_04 = calculateET(eta, phi, 0.4, 2, -10.0);
@@ -554,11 +593,14 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
         
         std::pair<int,int> leadtowerindex = recoCluster->get_lead_tower();
 
+        debugger->clusterCheckpoint6();
         // Filling the 7x7 matrix
         if(verbosity > 3){ std::cout << "finding shower shapes in 7x7";}
         int maxieta = leadtowerindex.first;
         int maxiphi = leadtowerindex.second;
         
+
+        /*
         int maxtowerieta = maxieta;
         int maxtoweriphi = maxiphi;
 
@@ -569,7 +611,6 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
         int vectorSize = inputDimx * inputDimy;
         input.resize(vectorSize, 0);
 
-        debugger->clusterCheckpoint6();
         if (ET > 0)
         {
             int xlength = int((inputDimx - 1) / 2);
@@ -599,16 +640,8 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
                     {
                         mappediphi -= 256;
                     }
-                    std::cout << "DEBUGGING: inside ieta, iphi loop at (ieta, iphi) = (" << ieta << ", " << iphi << ")" << std::endl;
                     unsigned int towerinfokey = TowerInfoDefs::encode_emcal(ieta, mappediphi);
-                    std::cout << "DEBUGGING: towerinfokey: " << towerinfokey << std::endl;
-                    std::cout << "DEBUGGING: Printing towerNodeMap: " << std::endl;
-                    printMap(towerNodeMap);
-                    TowerInfoContainerv4* CEMC_RETOWER = towerNodeMap["TOWERINFO_CALIB_CEMC_RETOWER"];
-                    std::cout << "DEBUGGING: CEMC_RETOWER size: " << CEMC_RETOWER->size() << std::endl;
-                    std::cout << "DEBUGGING: towerinfokey: " << towerinfokey << std::endl;
                     TowerInfo *towerinfo = towerNodeMap["TOWERINFO_CALIB_CEMC_RETOWER"]->get_tower_at_key(towerinfokey);
-                    std::cout << "DEBUGGING: towerinfo:" << towerinfo << std::endl;
                     if (!towerinfo)
                     {
                         if(verbosity > 3)
@@ -620,7 +653,6 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
                         continue;
                     }
                     int index = (ieta - maxtowerieta + ylength) * inputDimx + iphi - maxtoweriphi + xlength;
-                    std::cout << "DEBUGGING: vectorSize: " << vectorSize << ", index: " << index << std::endl;
                     input.at(index) = towerinfo->get_energy();
 
                 }
@@ -634,10 +666,48 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
         else
         {
             CNNprob = -1;
-        }
+        }*/
         debugger->clusterCheckpoint8();
 
-        // Calculating distance between phi/eta and the max values
+        /*
+        // DEBUGGING
+        std::cout << "DEBUGGING: recoCluster towermap: (key, eta, phi)";
+        const RawCluster::TowerMap tm = recoCluster->get_towermap();
+        for (auto tower_iter : tm)
+        {
+            RawTowerDefs::keytype tower_key = tower_iter.first;
+            float eta = RawTowerDefs::decode_index1(tower_key);
+            float phi = RawTowerDefs::decode_index2(tower_key);
+            
+            std::cout << "\t(" << tower_key << ", " << eta << ", " <<phi << ")" << std::endl;
+        }
+
+        std::cout << "DEBUGGING: TOWERINFO_CALIB_CEMC_RETOWER: (tower key, eta, phi), (key, eta, phi)" << std::endl;
+        TowerInfoContainerv4 *tfcemc = towerNodeMap["TOWERINFO_CALIB_CEMC"];
+        float ntowers = tfcemc->size();
+        for (unsigned int channel = 0; channel < ntowers; channel++)
+        {
+
+            unsigned int towerkey = tfcemc->encode_key(channel);
+            int ieta = tfcemc->getTowerEtaBin(towerkey);
+            int iphi = tfcemc->getTowerPhiBin(towerkey);
+            RawTowerDefs::CalorimeterId caloid = RawTowerDefs::CalorimeterId::CEMC;
+            RawTowerDefs::keytype key = RawTowerDefs::encode_towerid(caloid, ieta, iphi);
+            RawTowerGeom *tower_geom = geomEM->get_tower_geometry(key);
+            double this_phi = tower_geom->get_phi();
+            double this_eta = getTowerEta(tower_geom, 0, 0, vertexz);
+            if(ieta > 82 && ieta < 85 && iphi > 122 && iphi < 125)
+            {
+                std::cout << "\t(" << towerkey << ", " << ieta << ", " << iphi << "), (" << key << ", " << this_eta << ", " << this_phi << ")" << std::endl;
+            }
+        }
+        */
+
+
+
+
+
+        // Calculating distance spread between the highest energy tower and the other towers
         int detamax = 0;
         int dphimax = 0;
         int nsaturated = 0;
@@ -654,7 +724,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
             float phi = RawTowerDefs::decode_index2(tower_key);
 
             unsigned int towerinfokey = TowerInfoDefs::encode_emcal(eta,phi);
-            TowerInfo *towerinfo = (towerNodeMap["TOWERINFO_CALIB_CEMC_RETOWER"])->get_tower_at_key(towerinfokey);
+            TowerInfo *towerinfo = (towerNodeMap["TOWERINFO_CALIB_CEMC"])->get_tower_at_key(towerinfokey);
             towers_in_cluster.insert(towerinfokey);
 
             if(towerinfo)
@@ -741,7 +811,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
                     }
                     continue;
                 }
-                TowerInfo *towerinfo = towerNodeMap["TOWERINFO_CALIB_CEMC_RETOWER"]->get_tower_at_key(towerinfokey);
+                TowerInfo *towerinfo = towerNodeMap["TOWERINFO_CALIB_CEMC"]->get_tower_at_key(towerinfokey);
 
                 if(! towerinfo)
                 {
@@ -1078,7 +1148,7 @@ int DirectPhotonAN::process_event(PHCompositeNode *topNode)
         cluster_Phi[ncluster] = phi;
         cluster_prob[ncluster] = prob;
         cluster_merged_prob[ncluster] = merged_prob;
-        cluster_CNN_prob[ncluster] = CNNprob;
+        // cluster_CNN_prob[ncluster] = CNNprob;
         cluster_iso_02[ncluster] = clusteriso[0];
         cluster_iso_03[ncluster] = clusteriso[1];
         cluster_iso_04[ncluster] = clusteriso[2];
@@ -1249,20 +1319,20 @@ float DirectPhotonAN::calculateET(float eta, float phi, float dR, int layer, flo
     // for debug
     // std::string towerNodeName = "WAVEFORM_CEMC";
     // waveformcontainer = findNode::getClass<TowerInfoContainer>(topNodeptr, towerNodeName);
-    towercontainer = towerNodeMap["TOWERINFO_CALIB_CEMC_RETOWER"];
+    towercontainer = towerNodeMap["TOWERINFO_CALIB_CEMC"];
 
     caloid = RawTowerDefs::CalorimeterId::CEMC;
   }
   else if (layer == 1)
   {
     geomcontainer = geomIH;
-    towercontainer = towerNodeMap["TOWERINFO_CALIB_HCALIN_SUB1"];
+    towercontainer = towerNodeMap["TOWERINFO_CALIB_HCALIN"];
     caloid = RawTowerDefs::CalorimeterId::HCALIN;
   }
   else if (layer == 2)
   {
     geomcontainer = geomOH;
-    towercontainer = towerNodeMap["TOWERINFO_CALIB_HCALOUT_SUB1"];
+    towercontainer = towerNodeMap["TOWERINFO_CALIB_HCALOUT"];
     caloid = RawTowerDefs::CalorimeterId::HCALOUT;
   }
   else
@@ -1325,6 +1395,7 @@ float DirectPhotonAN::calculateET(float eta, float phi, float dR, int layer, flo
       }
     }
   }
+
   return ET;
 }
 
@@ -1355,3 +1426,79 @@ void DirectPhotonAN::printSetBits(uint64_t n)
       std::cout << std::endl;
   }
 
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+    /*                        SPIN INFO                         */
+    /*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/*
+int DirectPhotonAN::getSpinInfo()
+{
+    
+    int spinDB_status = 0;
+    unsigned int qa_level = 0xffff;
+    SpinDBContent spin_cont;
+    SpinDBOutput spin_out("phnxrc");
+
+    spin_out.StoreDBContent(runnumber,runnumber,qa_level);
+    spin_out.GetDBContentStore(spin_cont,runnumber);
+
+    crossingShift = spin_cont.GetCrossingShift();
+    if (crossingShift == -999 && verbosity > 0)
+    {
+        std::cout << "Warning: found crossing shift = -999 from Spin DB." << std::endl;
+        crossingShift = 0;
+    }
+
+    // Get beam polarizations
+    float bpolerr, ypolerr;
+    spin_cont.GetPolarizationBlue(0, polBlue, bpolerr);
+    spin_cont.GetPolarizationYellow(0, polYellow, ypolerr);
+
+    for (int i = 0; i < NBUNCHES; i++)
+    {
+        spinPatternBlue[i] = spin_cont.GetSpinPatternBlue(i);
+        spinPatternYellow[i] = spin_cont.GetSpinPatternYellow(i);
+
+        gl1pScalers[i] = spin_cont.GetScalerMbdNoCut(i);
+
+        int bsp = spinPatternBlue[i];
+        int ysp = spinPatternYellow[i];
+        if (bsp == 1) {lumiUpBlue += gl1pScalers[i];}
+        if (bsp == -1) {lumiDownBlue += gl1pScalers[i];}
+        if (ysp == 1) {lumiUpYellow += gl1pScalers[i];}
+        if (ysp == 1) {lumiDownYellow += gl1pScalers[i];}
+    }
+
+    crossingAngle = spin_cont.GetCrossAngle();
+
+    if(crossingAngle < -0.75)
+    {
+	    crossingAngleIntended = -1.5;
+    }
+    else if (crossingAngle > 0.75)
+    {
+        crossingAngleIntended = 1.5;
+    }
+    else
+    {
+        crossingAngleIntended = 0;
+    }
+
+    if (spinPatternYellow[0] == -999) 
+    {
+        spinDB_status = 1;
+        std::cout << "ERROR spinDB: spinPatternYellow[0] is -999" << std::endl;
+    }
+    if (lumiUpBlue == 0) 
+    {
+        spinDB_status = 2;
+        std::cout << "ERROR spinDB: lumiUpBlue is 0" << std::endl;
+    }
+    int badRunFlag = spin_cont.GetBadRunFlag();
+    if (badRunFlag) 
+    {
+        spinDB_status = 3;
+        std::cout << "ERROR spinDB: badRunFlag true" << std::endl;
+    }
+    
+    return spinDB_status;
+}*/

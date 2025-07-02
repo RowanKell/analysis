@@ -79,6 +79,11 @@ public:
       dphi += 2 * M_PI;
     return sqrt(deta * deta + dphi * dphi);
   }
+  int getRunNumber();
+
+  // int getSpinInfo();
+
+
   void printSetBits(uint64_t n);
 
   template<typename K, typename V>
@@ -103,6 +108,27 @@ private:
   // Numbers
   int runnumber{0};
   int eventnumber{0};
+
+  // Spin stuff
+  static const int NBUNCHES = 120; // From neutralMesonTSSA.h
+  int bunchnumber{0};
+  int sphenixBunch{0};
+  int bspin{0};
+  int yspin{0};
+  long long gl1pScalers[NBUNCHES] = {0};
+  int spinPatternBlue[NBUNCHES] = {0};
+  int spinPatternYellow[NBUNCHES] = {0};
+  int crossingShift = 0;
+  float lumiUpBlue = 0;
+  float lumiDownBlue = 0;
+  /* float relLumiBlue; */
+  float polBlue = 0;
+  float lumiUpYellow = 0;
+  float lumiDownYellow = 0;
+  /* float relLumiYellow; */
+  float polYellow = 0;
+  float crossingAngle = -999.9;
+  float crossingAngleIntended = -999.9;
 
   // Trigger stuff
 //   std::vector<int> using_trigger_bits{24, 25, 26, 27, 36, 37, 38};
@@ -256,7 +282,7 @@ private:
   static const int nRadii = 3;
 
   // Cluster cut values
-  float clusterpTmin{1};
+  float clusterpTmin{5};
 
   //Particle cut values
   float particlepTmin{1};
